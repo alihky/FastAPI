@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Request, status
 from .models import Base
 from .database import engine
@@ -9,7 +10,11 @@ app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 
-app.mount("/static", StaticFiles(directory="TodoApp/static"), name="static")
+# تحديد مسار مجلد static تلقائياً بالنسبة لمكان ملف main.py
+script_dir = os.path.dirname(__file__)
+static_abs_path = os.path.join(script_dir, "static")
+
+app.mount("/static", StaticFiles(directory=static_abs_path), name="static")
 
 
 @app.get("/")
@@ -23,10 +28,7 @@ def health_check():
     return {"status": "Healthy"}
 
 
-
 app.include_router(auth.router)
 app.include_router(todos.router)
 app.include_router(admin.router)
 app.include_router(users.router)
-
-
